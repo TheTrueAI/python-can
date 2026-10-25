@@ -46,8 +46,11 @@ jobs:
     - name: Setup SocketCAN
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
-        sudo apt-get update
-        sudo apt-get -y install linux-modules-extra-$(uname -r)
+        # Ubuntu 26.04 ships vcan in linux-modules, older releases need linux-modules-extra
+        if ! modinfo vcan > /dev/null 2>&1; then
+          sudo apt-get update
+          sudo apt-get -y install linux-modules-extra-$(uname -r)
+        fi
         sudo ./test/open_vcan.sh
     - name: Test with pytest via tox
       run: |
